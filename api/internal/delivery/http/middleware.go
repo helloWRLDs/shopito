@@ -91,6 +91,17 @@ func AuthenticateAdmin(next http.Handler) http.Handler {
 	})
 }
 
+func VerifiedsOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		isVerified, err := strconv.ParseBool(r.Header.Get("isVerified"))
+		if r.Header.Get("isVerified") == "" || err != nil || !isVerified {
+			jsonutil.EncodeJson(w, errors.ErrForbidden.Status(), errors.ErrForbidden.SetMessage("verified account required"))
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func ExposeHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
