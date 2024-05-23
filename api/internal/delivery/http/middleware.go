@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 	"shopito/api/config"
 	"shopito/api/pkg/types/errors"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
 )
 
@@ -91,7 +91,7 @@ func AuthenticateAdmin(next http.Handler) http.Handler {
 	})
 }
 
-func VerifiedsOnly(next http.Handler) http.Handler {
+func AuthenticateVerified(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		isVerified, err := strconv.ParseBool(r.Header.Get("isVerified"))
 		if r.Header.Get("isVerified") == "" || err != nil || !isVerified {
@@ -102,11 +102,11 @@ func VerifiedsOnly(next http.Handler) http.Handler {
 	})
 }
 
-func ExposeHeader(next http.Handler) http.Handler {
+func AuthenticateSelfOrAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
-		fmt.Println("id", r.Header.Get("id"))
-		fmt.Println("isAdmin", r.Header.Get("isAdmin"))
-		fmt.Println("isVerified", r.Header.Get("isVerified"))
+		isAdmin, _ := strconv.ParseBool(r.Header.Get("isAdmin"))
+		if chi.URLParam(r, "userId") == r.Header.Get("id") || isAdmin {
+			next.ServeHTTP(w, r)
+		}
 	})
 }

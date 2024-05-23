@@ -55,7 +55,7 @@ func (d *AuthDeliveryImpl) LoginController(w http.ResponseWriter, r *http.Reques
 }
 
 func (d *AuthDeliveryImpl) VerifyController(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "userId"))
 	if err != nil {
 		jsonutil.EncodeJson(w, errors.ErrBadRequest.Status(), errors.ErrBadRequest.SetMessage("wrong input"))
 		return
@@ -69,7 +69,7 @@ func (d *AuthDeliveryImpl) VerifyController(w http.ResponseWriter, r *http.Reque
 }
 
 func (d *AuthDeliveryImpl) ResendController(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "userId"))
 	if err != nil {
 		jsonutil.EncodeJson(w, errors.ErrBadRequest.Status(), errors.ErrBadRequest.SetMessage("wrong input"))
 		return

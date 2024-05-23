@@ -22,7 +22,7 @@ func (d *UserDeliveryImpl) GetUsersController(w http.ResponseWriter, r *http.Req
 }
 
 func (d *UserDeliveryImpl) GetUserController(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "userId"))
 	if err != nil {
 		jsonutil.EncodeJson(w, errors.ErrUnpocessableEntity.Status(), errors.ErrUnpocessableEntity.SetMessage("couldn't process user's id"))
 		return
@@ -36,7 +36,7 @@ func (d *UserDeliveryImpl) GetUserController(w http.ResponseWriter, r *http.Requ
 }
 
 func (d *UserDeliveryImpl) UpdateUserController(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "userId"))
 	if err != nil {
 		jsonutil.EncodeJson(w, errors.ErrUnpocessableEntity.Status(), errors.ErrUnpocessableEntity.SetMessage("couldn't process user's id"))
 		return
@@ -54,7 +54,7 @@ func (d *UserDeliveryImpl) UpdateUserController(w http.ResponseWriter, r *http.R
 }
 
 func (d *UserDeliveryImpl) DeleteUserController(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "userId"))
 	if err != nil {
 		jsonutil.EncodeJson(w, errors.ErrUnpocessableEntity.Status(), errors.ErrUnpocessableEntity.SetMessage("couldn't process user's id"))
 		return
