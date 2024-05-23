@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	authdelivery "shopito/api/internal/delivery/http/auth"
+	productsdelivery "shopito/api/internal/delivery/http/products"
 	userdelivery "shopito/api/internal/delivery/http/user"
 	jsonutil "shopito/api/pkg/util/json"
 
@@ -18,6 +19,7 @@ func Router(db *sql.DB) chi.Router {
 		router.With(Authenticate, AuthenticateAdmin).Get("/ping", func(w http.ResponseWriter, r *http.Request) { jsonutil.EncodeJson(w, 200, "Pong") })
 		router.Mount("/auth", authdelivery.New(db).Routes())
 		router.Mount("/users", userdelivery.New(db).Routes())
+		router.Mount("/products", productsdelivery.New(db).Routes())
 	})
 	return router
 }

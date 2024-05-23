@@ -21,9 +21,9 @@ func (d *UserDeliveryImpl) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", d.GetUsersController)
-	r.Get("/{id}", d.GetUserController)
-	r.Put("/{id}", d.UpdateUserController)
-	r.Delete("/{id}", d.DeleteUserController)
+	r.Get("/{userId}", d.GetUserController)
+	r.Put("/{userId}", d.UpdateUserController)
+	r.Delete("/{userId}", d.DeleteUserController)
 
 	return r
 }
