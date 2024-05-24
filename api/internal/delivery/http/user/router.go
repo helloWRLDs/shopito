@@ -1,22 +1,10 @@
 package userdelivery
 
 import (
-	"database/sql"
 	"shopito/api/internal/delivery/http/middleware"
-	userusecase "shopito/api/internal/usecase/user"
 
 	"github.com/go-chi/chi"
 )
-
-type UserDeliveryImpl struct {
-	uc userusecase.UserUseCase
-}
-
-func New(db *sql.DB) *UserDeliveryImpl {
-	return &UserDeliveryImpl{
-		uc: userusecase.New(db),
-	}
-}
 
 func (d *UserDeliveryImpl) Routes() chi.Router {
 	r := chi.NewRouter()

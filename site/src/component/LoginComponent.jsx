@@ -3,7 +3,7 @@ import { GoInfo } from "react-icons/go";
 import { IoMailSharp } from "react-icons/io5";
 import { MdOutlinePassword } from "react-icons/md";
 import { loginUser } from "../services/authService";
-import { getProduct } from "../services/prodcuService";
+import { getProduct } from "../services/productService";
 
 const LoginComponent = () => {
     const [email, setEmail] = useState('')

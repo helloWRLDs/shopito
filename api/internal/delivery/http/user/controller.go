@@ -1,9 +1,11 @@
 package userdelivery
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	userdomain "shopito/api/internal/domain/user"
+	userusecase "shopito/api/internal/usecase/user"
 	"shopito/api/pkg/types/errors"
 	"shopito/api/pkg/types/response"
 	jsonutil "shopito/api/pkg/util/json"
@@ -11,6 +13,16 @@ import (
 
 	"github.com/go-chi/chi"
 )
+
+type UserDeliveryImpl struct {
+	uc userusecase.UserUseCase
+}
+
+func New(db *sql.DB) *UserDeliveryImpl {
+	return &UserDeliveryImpl{
+		uc: userusecase.New(db),
+	}
+}
 
 func (d *UserDeliveryImpl) GetUsersController(w http.ResponseWriter, r *http.Request) {
 	users, err := d.uc.GetUsers(r.Context())

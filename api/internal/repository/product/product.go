@@ -55,8 +55,8 @@ func (r *ProductRepositoryImpl) GetById(id int) (*productdomain.Product, error) 
 
 func (r *ProductRepositoryImpl) Insert(product *productdomain.Product) (int, error) {
 	var id int
-	stmt := `INSERT INTO products(name, img_url, price, stock, category_id) RETURNING id`
-	err := r.db.QueryRow(stmt, product.Name, product.ImageURL, product.Price, product.Stock).Scan(&id)
+	stmt := `INSERT INTO products(name, img_url, price, stock, category_id) VALUES($1, $2, $3, $4, $5) RETURNING id`
+	err := r.db.QueryRow(stmt, product.Name, product.ImageURL, product.Price, product.Stock, product.CategoryID).Scan(&id)
 	if err != nil {
 		return -1, err
 	}

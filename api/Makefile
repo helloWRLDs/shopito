@@ -8,7 +8,7 @@ set-path:
 run:
 	gnome-terminal --title="api" -- go run ./cmd/api
 
-test-repo:
+test-user-repo:
 	go test ./internal/repository/user -v
 
 migrate-new:

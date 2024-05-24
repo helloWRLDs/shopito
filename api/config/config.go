@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -15,7 +16,8 @@ var (
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		panic(err)
+		// panic(err)
+		logrus.WithError(err).Error("config load err")
 	}
 	ADDR = os.Getenv("ADDR")
 	JWT = &Jwt{

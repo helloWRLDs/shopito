@@ -1,1 +1,1 @@
-# some-store
+# Shopito
