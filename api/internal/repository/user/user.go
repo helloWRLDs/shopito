@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-
-
 type UserRepositoryImpl struct {
 	db *sql.DB
 }

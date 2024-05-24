@@ -1,4 +1,4 @@
-package http
+package middleware
 
 import (
 	"net/http"
@@ -27,8 +27,9 @@ func SecureHeaders(next http.Handler) http.Handler {
 func Cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,access-control-allow-origin, access-control-allow-headers")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		next.ServeHTTP(w, r)
 	})
 }
@@ -47,6 +48,10 @@ func LogRequest(next http.Handler) http.Handler {
 
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if len(r.Header.Get("Authorization")) < 8 {
+			jsonutil.EncodeJson(w, errors.ErrNotAuthorized.Status(), errors.ErrNotAuthorized.SetMessage("invalid token format"))
+			return
+		}
 		claims := jwt.MapClaims{}
 		var (
 			key []byte = []byte(config.JWT.SECRET)
@@ -105,8 +110,10 @@ func AuthenticateVerified(next http.Handler) http.Handler {
 func AuthenticateSelfOrAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		isAdmin, _ := strconv.ParseBool(r.Header.Get("isAdmin"))
-		if chi.URLParam(r, "userId") == r.Header.Get("id") || isAdmin {
-			next.ServeHTTP(w, r)
+		if chi.URLParam(r, "userId") != r.Header.Get("id") && !isAdmin {
+			jsonutil.EncodeJson(w, errors.ErrForbidden.Status(), errors.ErrForbidden.SetMessage("desired data is accessible only for admin or current user"))
+			return
 		}
+		next.ServeHTTP(w, r)
 	})
 }

@@ -46,6 +46,7 @@ func (d *AuthDeliveryImpl) LoginController(w http.ResponseWriter, r *http.Reques
 		jsonutil.EncodeJson(w, errors.ErrUnpocessableEntity.Status(), errors.ErrUnpocessableEntity.SetMessage("error parsing json"))
 		return
 	}
+	fmt.Println(user.Password)
 	token, error := d.uc.LoginUser(r.Context(), &user)
 	if error != nil {
 		jsonutil.EncodeJson(w, error.Status(), error)

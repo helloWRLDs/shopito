@@ -47,6 +47,7 @@ func (u *UserUseCaseImpl) GetUser(ctx context.Context, id int) (*userdomain.User
 		logrus.WithField("err", err.Error()).Error("db err")
 		return nil, errors.ErrInternal.SetMessage("Internal Server Error")
 	}
+	user.Password = ""
 	return user, nil
 }
 

@@ -2,6 +2,7 @@ package userdelivery
 
 import (
 	"database/sql"
+	"shopito/api/internal/delivery/http/middleware"
 	userusecase "shopito/api/internal/usecase/user"
 
 	"github.com/go-chi/chi"
@@ -20,10 +21,14 @@ func New(db *sql.DB) *UserDeliveryImpl {
 func (d *UserDeliveryImpl) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", d.GetUsersController)
-	r.Get("/{userId}", d.GetUserController)
-	r.Put("/{userId}", d.UpdateUserController)
-	r.Delete("/{userId}", d.DeleteUserController)
+	r.With(middleware.Authenticate, middleware.AuthenticateAdmin).
+		Get("/", d.GetUsersController)
+	r.With(middleware.Authenticate, middleware.AuthenticateSelfOrAdmin).
+		Get("/{userId}", d.GetUserController)
+	r.With(middleware.Authenticate, middleware.AuthenticateSelfOrAdmin).
+		Put("/{userId}", d.UpdateUserController)
+	r.With(middleware.Authenticate, middleware.AuthenticateSelfOrAdmin).
+		Delete("/{userId}", d.DeleteUserController)
 
 	return r
 }
