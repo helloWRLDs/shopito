@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
+}
+
+
+
+body {
+    background: linear-gradient(to right, rgb(218, 218, 218), white);
+    min-height: 100vh;
+    /* position: relative; */
+}
