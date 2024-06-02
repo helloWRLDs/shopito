@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package protobuf;
+
+option go_package = "shopito/services/products/protobuf";
+
+service ProductService {
+    rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+    rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+    rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+    rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+    rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+
+    rpc GetCategory(GetCategoryRequest) returns (GetCategoryResponse);
+    rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
+    rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+    rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
+    rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
+    
+    rpc ListProductsByCategory(ListProductsByCategoryRequest) returns (ListProductsByCategoryResponse);
+}
+
+message CreateProductRequest {
+    string id = 1;
+    string name = 2;
+    string img_url = 3;
+    int32 price = 4;
+    int32 stock = 5;
+    string category_id = 6;
+}
+
+message CreateProductResponse {
+    string id = 1;
+    bool success = 2;
+}
+
+message GetProductRequest {
+    string id = 1;
+}
+
+message GetProductResponse {
+    Product product = 1;
+}
+
+message ListProductsRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+}
+
+message ListProductsResponse {
+    repeated Product products = 1;
+}
+
+message UpdateProductRequest {
+    string id = 1;
+    Product product = 2;
+}
+
+message UpdateProductResponse {
+    bool success = 1;
+}
+
+message DeleteProductRequest {
+    string id = 1;
+}
+
+message DeleteProductResponse {
+    bool success = 1;
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string img_url = 3;
+    int32 price = 4;
+    int32 stock = 5;
+    string category_id = 6;
+}
+
+message Category {
+    string id = 1;
+    string name = 2;
+}
+
+message GetCategoryRequest {
+    string id = 1;
+}
+
+message GetCategoryResponse {
+    Category category = 1;
+}
+
+message CreateCategoryRequest {
+    string name = 1;
+}
+
+message CreateCategoryResponse {
+    string id = 1;
+    bool success = 2;
+}
+
+message ListCategoriesRequest {}
+
+message ListCategoriesResponse {
+    repeated Category categories = 1;
+}
+
+message DeleteCategoryRequest {
+    string id = 1;
+}
+
+message DeleteCategoryResponse {
+    bool success = 1;
+}
+
+message UpdateCategoryRequest {
+    string id = 1;
+    Category category = 2;
+}
+
+message UpdateCategoryResponse {
+    bool success = 1;
+}
+
+message ListProductsByCategoryRequest {
+    string category_name = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+message ListProductsByCategoryResponse {
+    repeated Product products = 1;
+}

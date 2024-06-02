@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16.3
+    container_name: postgres
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - webnet
+  
+  products-service:
+    container_name: products-service
+    image: products-service
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: products-service
+    ports:
+      - "3007:3007"
+    environment:
+      DB_HOST: postgres
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
+
+  users-service:
+    container_name: users-service
+    image: users-service
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: users-service
+    ports:
+      - "3002:3002"
+    environment:
+      DB_HOST: postgres
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
+  
+  notifier-service:
+    container_name: notifier-service
+    image: notifier-service
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: notifier-service
+    ports:
+      - "3003:3003"
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
+  
+  api-gateway:
+    container_name: api-gateway
+    image: api-gateway
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      AUTH_ADDR: :3001
+      USERS_ADDR: users-service:3002
+      PRODUCTS_ADDR: productrs-service:3006
+
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
+
+volumes:
+  pgdata:
+
+networks:
+  webnet:

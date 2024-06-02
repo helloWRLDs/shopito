@@ -1,0 +1,12 @@
+{
+    "cvv": "432",
+    "name": "Danil Li",
+    "number": "3214 4314 6546 1234",
+    "email": "danil.li24x@gmail.com",
+    "items": [
+        {"name": "t-shirt", "price": 10, "quantity": 1},
+        {"name": "pants", "price": 20, "quantity": 2},
+        {"name": "jacket", "price": 100, "quantity": 1},
+        {"name": "socks", "price": 5, "quantity": 5}
+    ]
+}
