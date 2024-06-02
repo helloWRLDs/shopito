@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
+	userproto "shopito/pkg/protobuf/users"
 	"shopito/services/notifier/config"
 	"shopito/services/notifier/internal/adapter"
-	"shopito/services/notifier/protobuf"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -46,8 +46,8 @@ func (s *NotifierService) SendAllEmailService(subject, body string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	c := protobuf.NewUserServiceClient(conn)
-	r, err := c.GetUsers(ctx, &protobuf.GetUsersRequest{})
+	c := userproto.NewUserServiceClient(conn)
+	r, err := c.GetUsers(ctx, &userproto.GetUsersRequest{})
 	if err != nil {
 		return status.Errorf(codes.Unavailable, "Users service is unavailable")
 	}

@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	user "shopito/services/users/protobuf"
+	user "shopito/pkg/protobuf/users"
 	"time"
 
 	"google.golang.org/grpc"

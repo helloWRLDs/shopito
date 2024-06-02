@@ -1,9 +1,9 @@
 package service
 
 import (
+	productproto "shopito/pkg/protobuf/products"
 	categoryrepository "shopito/services/products/internal/repository/category"
 	productrepository "shopito/services/products/internal/repository/product"
-	"shopito/services/products/protobuf"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -12,15 +12,15 @@ import (
 )
 
 type Service interface {
-	CreateProductService(product *protobuf.Product) (int, error)
+	CreateProductService(product *productproto.Product) (int, error)
 	DeleteProductService(id string) error
-	GetProductService(id string) (*protobuf.Product, error)
-	UpdateProductService(id string, product *protobuf.Product) error
-	CreateCategoryService(category *protobuf.Category) (int, error)
+	GetProductService(id string) (*productproto.Product, error)
+	UpdateProductService(id string, product *productproto.Product) error
+	CreateCategoryService(category *productproto.Category) (int, error)
 	DeleteCategoryService(id string) error
-	GetCategoryService(id string) (*protobuf.Category, error)
-	UpdateCategoryService(id string, category *protobuf.Category) error
-	ListCategoriesService() ([]*protobuf.Category, error)
+	GetCategoryService(id string) (*productproto.Category, error)
+	UpdateCategoryService(id string, category *productproto.Category) error
+	ListCategoriesService() ([]*productproto.Category, error)
 }
 
 type ProductService struct {
@@ -35,7 +35,7 @@ func New(productRepo *productrepository.ProductRepository, categoryRepo *categor
 	}
 }
 
-func (s *ProductService) CreateProductService(product *protobuf.Product) (int, error) {
+func (s *ProductService) CreateProductService(product *productproto.Product) (int, error) {
 	id, err := s.productRepo.Insert(product)
 	if err != nil {
 		logrus.WithError(err).Error("Internal Server Error")
@@ -58,7 +58,7 @@ func (s *ProductService) DeleteProductService(id string) error {
 	return nil
 }
 
-func (s *ProductService) GetProductService(id string) (*protobuf.Product, error) {
+func (s *ProductService) GetProductService(id string) (*productproto.Product, error) {
 	productId, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Couldn't process the id")
@@ -73,7 +73,7 @@ func (s *ProductService) GetProductService(id string) (*protobuf.Product, error)
 	return product, nil
 }
 
-func (s *ProductService) UpdateProductService(id string, product *protobuf.Product) error {
+func (s *ProductService) UpdateProductService(id string, product *productproto.Product) error {
 	productId, err := strconv.Atoi(id)
 	if err != nil {
 		return status.Errorf(codes.InvalidArgument, "Couldn't process the id")
@@ -84,7 +84,7 @@ func (s *ProductService) UpdateProductService(id string, product *protobuf.Produ
 	return nil
 }
 
-func (s *ProductService) CreateCategoryService(category *protobuf.Category) (int, error) {
+func (s *ProductService) CreateCategoryService(category *productproto.Category) (int, error) {
 	id, err := s.categoryRepo.Insert(category)
 	if err != nil {
 		logrus.WithError(err).Error("Internal Server Error")
@@ -107,7 +107,7 @@ func (s *ProductService) DeleteCategoryService(id string) error {
 	return nil
 }
 
-func (s *ProductService) GetCategoryService(id string) (*protobuf.Category, error) {
+func (s *ProductService) GetCategoryService(id string) (*productproto.Category, error) {
 	categoryId, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Couldn't process the id")
@@ -122,7 +122,7 @@ func (s *ProductService) GetCategoryService(id string) (*protobuf.Category, erro
 	return category, nil
 }
 
-func (s *ProductService) UpdateCategoryService(id string, category *protobuf.Category) error {
+func (s *ProductService) UpdateCategoryService(id string, category *productproto.Category) error {
 	categoryId, err := strconv.Atoi(id)
 	if err != nil {
 		return status.Errorf(codes.InvalidArgument, "Couldn't process the id")
@@ -133,7 +133,7 @@ func (s *ProductService) UpdateCategoryService(id string, category *protobuf.Cat
 	return nil
 }
 
-func (s *ProductService) ListCategoriesService() ([]*protobuf.Category, error) {
+func (s *ProductService) ListCategoriesService() ([]*productproto.Category, error) {
 	categories, err := s.categoryRepo.List()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal Server Error")

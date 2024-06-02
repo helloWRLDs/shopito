@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package protobuf;
 
-option go_package = "shopito/services/notifier/protobuf";
+option go_package = "/notifier;notifierproto";
 
 service NotifierService {
     rpc SendEmail(SendEmailRequest) returns (SendEmailResponse);

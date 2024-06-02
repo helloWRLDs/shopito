@@ -9,7 +9,7 @@ import (
 	"shopito/services/users/internal/repository"
 	"shopito/services/users/internal/service"
 
-	"shopito/services/users/protobuf"
+	"shopito/pkg/protobuf/users"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -32,7 +32,7 @@ func main() {
 	service := service.New(repo)
 	delivery := delivery.New(service)
 
-	protobuf.RegisterUserServiceServer(srv, delivery)
+	userproto.RegisterUserServiceServer(srv, delivery)
 
 	logrus.WithField("addr", config.ADDR).Info("server started")
 	if err := srv.Serve(lis); err != nil {

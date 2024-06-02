@@ -3,11 +3,11 @@ package main
 import (
 	"net"
 	"shopito/pkg/log"
+	notifierproto "shopito/pkg/protobuf/notifier"
 	"shopito/services/notifier/config"
 	"shopito/services/notifier/internal/adapter"
 	"shopito/services/notifier/internal/delivery"
 	"shopito/services/notifier/internal/service"
-	"shopito/services/notifier/protobuf"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -26,7 +26,7 @@ func main() {
 	service := service.New(adapter)
 	delivery := delivery.New(service)
 
-	protobuf.RegisterNotifierServiceServer(srv, delivery)
+	notifierproto.RegisterNotifierServiceServer(srv, delivery)
 
 	logrus.WithField("addr", config.ADDR).Info("server started")
 	if err := srv.Serve(lis); err != nil {

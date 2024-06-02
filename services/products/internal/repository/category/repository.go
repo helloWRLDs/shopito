@@ -2,16 +2,16 @@ package categoryrepository
 
 import (
 	"database/sql"
-	"shopito/services/products/protobuf"
+	productproto "shopito/pkg/protobuf/products"
 )
 
 type Repository interface {
-	Insert(category *protobuf.Category) (int, error)
+	Insert(category *productproto.Category) (int, error)
 	Delete(id int) error
-	Update(id int, category *protobuf.Category) error
+	Update(id int, category *productproto.Category) error
 	Exist(id int) bool
-	Get(id int) (*protobuf.Category, error)
-	List() ([]*protobuf.Category, error)
+	Get(id int) (*productproto.Category, error)
+	List() ([]*productproto.Category, error)
 }
 
 type CategoryRepository struct {
@@ -24,7 +24,7 @@ func New(db *sql.DB) *CategoryRepository {
 	}
 }
 
-func (r *CategoryRepository) Insert(category *protobuf.Category) (int, error) {
+func (r *CategoryRepository) Insert(category *productproto.Category) (int, error) {
 	var id int
 	stmt := `INSERT INTO categories(name) VALUES($1) RETURNING id`
 	err := r.db.QueryRow(stmt, category.Name).Scan(&id)
@@ -40,7 +40,7 @@ func (r *CategoryRepository) Delete(id int) error {
 	return err
 }
 
-func (r *CategoryRepository) Update(id int, category *protobuf.Category) error {
+func (r *CategoryRepository) Update(id int, category *productproto.Category) error {
 	stmt := `UPDATE categories SET name=$1 WHERE id=$2`
 	_, err := r.db.Exec(stmt, category.Name, id)
 	return err
@@ -55,8 +55,8 @@ func (r *CategoryRepository) Exist(id int) bool {
 	return exist
 }
 
-func (r *CategoryRepository) Get(id int) (*protobuf.Category, error) {
-	var c protobuf.Category
+func (r *CategoryRepository) Get(id int) (*productproto.Category, error) {
+	var c productproto.Category
 	stmt := `SELECT * FROM categories WHERE id=$1`
 	err := r.db.QueryRow(stmt, id).Scan(&c.Id, &c.Name)
 	if err != nil {
@@ -65,8 +65,8 @@ func (r *CategoryRepository) Get(id int) (*protobuf.Category, error) {
 	return &c, nil
 }
 
-func (r *CategoryRepository) List() ([]*protobuf.Category, error) {
-	var cs []*protobuf.Category
+func (r *CategoryRepository) List() ([]*productproto.Category, error) {
+	var cs []*productproto.Category
 	stmt := `SELECT * FROM categories`
 	rows, err := r.db.Query(stmt)
 	if err != nil {
@@ -75,7 +75,7 @@ func (r *CategoryRepository) List() ([]*protobuf.Category, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var c protobuf.Category
+		var c productproto.Category
 		if err := rows.Scan(&c.Id, &c.Name); err != nil {
 			return nil, err
 		}

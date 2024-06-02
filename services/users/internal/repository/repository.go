@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"shopito/services/users/protobuf"
+	userproto "shopito/pkg/protobuf/users"
 	"time"
 )
 
@@ -16,9 +16,9 @@ func New(db *sql.DB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) GetByEmail(email string) (*protobuf.User, error) {
+func (r *UserRepository) GetByEmail(email string) (*userproto.User, error) {
 	var (
-		u    protobuf.User
+		u    userproto.User
 		stmt string = `SELECT id, name, email, password, is_admin, is_verified FROM users WHERE email=$1`
 	)
 	row := r.db.QueryRow(stmt, email)
@@ -29,9 +29,9 @@ func (r *UserRepository) GetByEmail(email string) (*protobuf.User, error) {
 	return &u, nil
 }
 
-func (r *UserRepository) GetById(id int64) (*protobuf.User, error) {
+func (r *UserRepository) GetById(id int64) (*userproto.User, error) {
 	var (
-		u    protobuf.User
+		u    userproto.User
 		stmt string = `SELECT id, name, email, password, is_admin, is_verified FROM users WHERE id=$1`
 	)
 	row := r.db.QueryRow(stmt, id)
@@ -42,7 +42,7 @@ func (r *UserRepository) GetById(id int64) (*protobuf.User, error) {
 	return &u, nil
 }
 
-func (r *UserRepository) Insert(user *protobuf.User) (int64, error) {
+func (r *UserRepository) Insert(user *userproto.User) (int64, error) {
 	var (
 		id   int64
 		stmt = `INSERT INTO users(name, email, password) VALUES($1, $2, $3) RETURNING id`
@@ -64,7 +64,7 @@ func (r *UserRepository) ExistById(id int64) bool {
 	return exist
 }
 
-func (r *UserRepository) Update(id int64, user *protobuf.User) error {
+func (r *UserRepository) Update(id int64, user *userproto.User) error {
 	stmt := `UPDATE users SET name=$1, email=$2, password=$3, is_verified=$4, is_admin=$5, updated_at=$6 WHERE id=$7`
 	_, err := r.db.Exec(stmt, user.Name, user.Email, user.Password, user.IsVerified, user.IsAdmin, time.Now(), id)
 	if err != nil {
@@ -91,8 +91,8 @@ func (r *UserRepository) IsVerified(id int64) bool {
 	return verified
 }
 
-func (r *UserRepository) GetAll() ([]*protobuf.User, error) {
-	var us []*protobuf.User
+func (r *UserRepository) GetAll() ([]*userproto.User, error) {
+	var us []*userproto.User
 	stmt := `SELECT id, name, email, password, is_admin, is_verified FROM users`
 	rows, err := r.db.Query(stmt)
 	if err != nil {
@@ -100,7 +100,7 @@ func (r *UserRepository) GetAll() ([]*protobuf.User, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var u protobuf.User
+		var u userproto.User
 		err := rows.Scan(&u.Id, &u.Name, &u.Email, &u.Password, &u.IsAdmin, &u.IsVerified)
 		if err != nil {
 			return nil, err

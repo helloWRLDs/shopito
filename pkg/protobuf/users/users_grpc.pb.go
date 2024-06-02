@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: services/users/protobuf/users.proto
 
-package protobuf
+package userproto
 
 import (
 	context "context"

@@ -2,15 +2,15 @@ package productrepository
 
 import (
 	"database/sql"
-	"shopito/services/products/protobuf"
+	"shopito/pkg/protobuf/products"
 	"strconv"
 )
 
 type Repository interface {
-	Insert(product *protobuf.Product) (int, error)
+	Insert(product *productproto.Product) (int, error)
 	Delete(id int) error
-	Update(id int, product *protobuf.Product) error
-	Get(id int) (*protobuf.Product, error)
+	Update(id int, product *productproto.Product) error
+	Get(id int) (*productproto.Product, error)
 	Exist(id int) bool
 }
 
@@ -24,7 +24,7 @@ func New(db *sql.DB) *ProductRepository {
 	}
 }
 
-func (r *ProductRepository) Insert(product *protobuf.Product) (int, error) {
+func (r *ProductRepository) Insert(product *productproto.Product) (int, error) {
 	var id int
 	stmt := `INSERT INTO products(name, img_url, price, stock, category_id) VALUES($1, $2, $3, $4, $5) RETURNING id`
 	categoryId, err := strconv.Atoi(product.CategoryId)
@@ -44,7 +44,7 @@ func (r *ProductRepository) Delete(id int) error {
 	return err
 }
 
-func (r *ProductRepository) Update(id int, product *protobuf.Product) error {
+func (r *ProductRepository) Update(id int, product *productproto.Product) error {
 	categoryId, err := strconv.Atoi(product.GetCategoryId())
 	if err != nil {
 		categoryId = 0
@@ -63,8 +63,8 @@ func (r *ProductRepository) Exist(id int) bool {
 	return exist
 }
 
-func (r *ProductRepository) Get(id int) (*protobuf.Product, error) {
-	var p protobuf.Product
+func (r *ProductRepository) Get(id int) (*productproto.Product, error) {
+	var p productproto.Product
 	stmt := `SELECT * FROM products WHERE id=$1`
 	err := r.db.QueryRow(stmt, id).Scan(&p.Id, &p.Name, &p.ImgUrl, &p.Price, &p.Stock, &p.CategoryId)
 	if err != nil {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"shopito/services/notifier/protobuf"
+	notifierproto "shopito/pkg/protobuf/notifier"
 	"time"
 
 	"google.golang.org/grpc"
@@ -17,13 +17,13 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := protobuf.NewNotifierServiceClient(conn)
+	c := notifierproto.NewNotifierServiceClient(conn)
 
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	r, err := c.SendEmail(ctx, &protobuf.SendEmailRequest{
+	r, err := c.SendEmail(ctx, &notifierproto.SendEmailRequest{
 		To:      "danil.li24x@gmail.com",
 		Subject: "Some subject",
 		Body:    "some body wants to know",

@@ -2,13 +2,13 @@ package delivery
 
 import (
 	"context"
+	productproto "shopito/pkg/protobuf/products"
 	productservice "shopito/services/products/internal/services"
-	"shopito/services/products/protobuf"
 	"strconv"
 )
 
 type Delivery struct {
-	protobuf.UnimplementedProductServiceServer
+	productproto.UnimplementedProductServiceServer
 	productServ productservice.Service
 }
 
@@ -18,12 +18,12 @@ func New(product *productservice.ProductService) *Delivery {
 	}
 }
 
-func (d *Delivery) CreateCategory(ctx context.Context, request *protobuf.CreateCategoryRequest) (*protobuf.CreateCategoryResponse, error) {
-	response := protobuf.CreateCategoryResponse{
+func (d *Delivery) CreateCategory(ctx context.Context, request *productproto.CreateCategoryRequest) (*productproto.CreateCategoryResponse, error) {
+	response := productproto.CreateCategoryResponse{
 		Id:      "-1",
 		Success: false,
 	}
-	id, err := d.productServ.CreateCategoryService(&protobuf.Category{
+	id, err := d.productServ.CreateCategoryService(&productproto.Category{
 		Name: request.GetName(),
 	})
 	if err != nil {
@@ -34,9 +34,9 @@ func (d *Delivery) CreateCategory(ctx context.Context, request *protobuf.CreateC
 	return &response, nil
 }
 
-func (d *Delivery) CreateProduct(ctx context.Context, request *protobuf.CreateProductRequest) (*protobuf.CreateProductResponse, error) {
-	response := protobuf.CreateProductResponse{}
-	product := protobuf.Product{
+func (d *Delivery) CreateProduct(ctx context.Context, request *productproto.CreateProductRequest) (*productproto.CreateProductResponse, error) {
+	response := productproto.CreateProductResponse{}
+	product := productproto.Product{
 		Id:         request.GetId(),
 		Name:       request.GetName(),
 		ImgUrl:     request.GetImgUrl(),
@@ -54,8 +54,8 @@ func (d *Delivery) CreateProduct(ctx context.Context, request *protobuf.CreatePr
 	return &response, nil
 }
 
-func (d *Delivery) DeleteCategory(ctx context.Context, request *protobuf.DeleteCategoryRequest) (*protobuf.DeleteCategoryResponse, error) {
-	response := protobuf.DeleteCategoryResponse{
+func (d *Delivery) DeleteCategory(ctx context.Context, request *productproto.DeleteCategoryRequest) (*productproto.DeleteCategoryResponse, error) {
+	response := productproto.DeleteCategoryResponse{
 		Success: false,
 	}
 	if err := d.productServ.DeleteCategoryService(request.GetId()); err != nil {
@@ -65,8 +65,8 @@ func (d *Delivery) DeleteCategory(ctx context.Context, request *protobuf.DeleteC
 	return &response, nil
 }
 
-func (d *Delivery) DeleteProduct(ctx context.Context, request *protobuf.DeleteProductRequest) (*protobuf.DeleteProductResponse, error) {
-	response := &protobuf.DeleteProductResponse{Success: false}
+func (d *Delivery) DeleteProduct(ctx context.Context, request *productproto.DeleteProductRequest) (*productproto.DeleteProductResponse, error) {
+	response := &productproto.DeleteProductResponse{Success: false}
 	if err := d.productServ.DeleteProductService(request.GetId()); err != nil {
 		return response, err
 	}
@@ -74,49 +74,49 @@ func (d *Delivery) DeleteProduct(ctx context.Context, request *protobuf.DeletePr
 	return response, nil
 }
 
-func (d *Delivery) GetCategory(ctx context.Context, request *protobuf.GetCategoryRequest) (*protobuf.GetCategoryResponse, error) {
+func (d *Delivery) GetCategory(ctx context.Context, request *productproto.GetCategoryRequest) (*productproto.GetCategoryResponse, error) {
 	category, err := d.productServ.GetCategoryService(request.GetId())
 	if err != nil {
 		return nil, err
 	}
-	response := protobuf.GetCategoryResponse{
+	response := productproto.GetCategoryResponse{
 		Category: category,
 	}
 	return &response, nil
 }
 
-func (d *Delivery) GetProduct(ctx context.Context, request *protobuf.GetProductRequest) (*protobuf.GetProductResponse, error) {
+func (d *Delivery) GetProduct(ctx context.Context, request *productproto.GetProductRequest) (*productproto.GetProductResponse, error) {
 	product, err := d.productServ.GetProductService(request.GetId())
 	if err != nil {
 		return nil, err
 	}
-	response := protobuf.GetProductResponse{
+	response := productproto.GetProductResponse{
 		Product: product,
 	}
 	return &response, nil
 }
 
-func (d *Delivery) ListCategories(ctx context.Context, request *protobuf.ListCategoriesRequest) (*protobuf.ListCategoriesResponse, error) {
+func (d *Delivery) ListCategories(ctx context.Context, request *productproto.ListCategoriesRequest) (*productproto.ListCategoriesResponse, error) {
 	categories, err := d.productServ.ListCategoriesService()
 	if err != nil {
 		return nil, err
 	}
-	response := protobuf.ListCategoriesResponse{
+	response := productproto.ListCategoriesResponse{
 		Categories: categories,
 	}
 	return &response, nil
 }
 
-func (d *Delivery) ListProducts(ctx context.Context, request *protobuf.ListProductsRequest) (*protobuf.ListProductsResponse, error) {
+func (d *Delivery) ListProducts(ctx context.Context, request *productproto.ListProductsRequest) (*productproto.ListProductsResponse, error) {
 	return nil, nil
 }
 
-func (d *Delivery) ListProductsByCategory(ctx context.Context, request *protobuf.ListProductsByCategoryRequest) (*protobuf.ListProductsByCategoryResponse, error) {
+func (d *Delivery) ListProductsByCategory(ctx context.Context, request *productproto.ListProductsByCategoryRequest) (*productproto.ListProductsByCategoryResponse, error) {
 	return nil, nil
 }
 
-func (d *Delivery) UpdateCategory(ctx context.Context, request *protobuf.UpdateCategoryRequest) (*protobuf.UpdateCategoryResponse, error) {
-	response := protobuf.UpdateCategoryResponse{
+func (d *Delivery) UpdateCategory(ctx context.Context, request *productproto.UpdateCategoryRequest) (*productproto.UpdateCategoryResponse, error) {
+	response := productproto.UpdateCategoryResponse{
 		Success: false,
 	}
 	err := d.productServ.UpdateCategoryService(request.GetId(), request.GetCategory())
@@ -127,8 +127,8 @@ func (d *Delivery) UpdateCategory(ctx context.Context, request *protobuf.UpdateC
 	return &response, nil
 }
 
-func (d *Delivery) UpdateProduct(ctx context.Context, request *protobuf.UpdateProductRequest) (*protobuf.UpdateProductResponse, error) {
-	response := protobuf.UpdateProductResponse{
+func (d *Delivery) UpdateProduct(ctx context.Context, request *productproto.UpdateProductRequest) (*productproto.UpdateProductResponse, error) {
+	response := productproto.UpdateProductResponse{
 		Success: false,
 	}
 	if err := d.productServ.UpdateProductService(request.GetId(), request.GetProduct()); err != nil {

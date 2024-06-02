@@ -3,11 +3,11 @@ package delivery
 import (
 	"context"
 	"shopito/services/users/internal/service"
-	"shopito/services/users/protobuf"
+	"shopito/pkg/protobuf/users"
 )
 
 type Delivery struct {
-	protobuf.UnimplementedUserServiceServer
+	userproto.UnimplementedUserServiceServer
 	serv service.Service
 }
 
@@ -17,13 +17,13 @@ func New(serv *service.UserService) *Delivery {
 	}
 }
 
-func (d *Delivery) CreateUser(ctx context.Context, request *protobuf.CreateUserRequest) (*protobuf.CreateUserResponse, error) {
-	user := protobuf.User{
+func (d *Delivery) CreateUser(ctx context.Context, request *userproto.CreateUserRequest) (*userproto.CreateUserResponse, error) {
+	user := userproto.User{
 		Name:     request.GetName(),
 		Email:    request.GetEmail(),
 		Password: request.GetPassword(),
 	}
-	response := protobuf.CreateUserResponse{}
+	response := userproto.CreateUserResponse{}
 
 	id, err := d.serv.InsertUserService(&user)
 	if err != nil {
@@ -35,8 +35,8 @@ func (d *Delivery) CreateUser(ctx context.Context, request *protobuf.CreateUserR
 	return &response, nil
 }
 
-func (d *Delivery) DeleteUser(ctx context.Context, request *protobuf.DeleteUserRequest) (*protobuf.DeleteUserResponse, error) {
-	response := &protobuf.DeleteUserResponse{}
+func (d *Delivery) DeleteUser(ctx context.Context, request *userproto.DeleteUserRequest) (*userproto.DeleteUserResponse, error) {
+	response := &userproto.DeleteUserResponse{}
 	if err := d.serv.DeleteUserService(request.GetId()); err != nil {
 		response.Success = false
 		return response, err
@@ -45,40 +45,40 @@ func (d *Delivery) DeleteUser(ctx context.Context, request *protobuf.DeleteUserR
 	return response, nil
 }
 
-func (d *Delivery) GetUserByEmail(ctx context.Context, request *protobuf.GetUserByEmailRequest) (*protobuf.GetUserByEmailResponse, error) {
+func (d *Delivery) GetUserByEmail(ctx context.Context, request *userproto.GetUserByEmailRequest) (*userproto.GetUserByEmailResponse, error) {
 	user, err := d.serv.GetUserByEmailService(request.GetEmail())
 	if err != nil {
 		return nil, err
 	}
-	response := protobuf.GetUserByEmailResponse{
+	response := userproto.GetUserByEmailResponse{
 		User: user,
 	}
 	return &response, nil
 }
 
-func (d *Delivery) GetUser(ctx context.Context, request *protobuf.GetUserRequest) (*protobuf.GetUserResponse, error) {
+func (d *Delivery) GetUser(ctx context.Context, request *userproto.GetUserRequest) (*userproto.GetUserResponse, error) {
 	user, err := d.serv.GetUserService(request.GetId())
 	if err != nil {
 		return nil, err
 	}
-	response := &protobuf.GetUserResponse{
+	response := &userproto.GetUserResponse{
 		User: user,
 	}
 	return response, nil
 }
 
-func (d *Delivery) GetUsers(ctx context.Context, request *protobuf.GetUsersRequest) (*protobuf.GetUsersResponse, error) {
+func (d *Delivery) GetUsers(ctx context.Context, request *userproto.GetUsersRequest) (*userproto.GetUsersResponse, error) {
 	users, err := d.serv.GetUsersService()
 	if err != nil {
 		return nil, err
 	}
-	response := protobuf.GetUsersResponse{
+	response := userproto.GetUsersResponse{
 		Users: users,
 	}
 
 	return &response, nil
 }
 
-func (d *Delivery) UpdateUser(ctx context.Context, request *protobuf.UpdateUserRequest) (*protobuf.UpdateUserResponse, error) {
+func (d *Delivery) UpdateUser(ctx context.Context, request *userproto.UpdateUserRequest) (*userproto.UpdateUserResponse, error) {
 	return nil, nil
 }

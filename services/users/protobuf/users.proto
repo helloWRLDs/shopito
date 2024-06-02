@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package protobuf;
 
-option go_package = "shopito/services/users/protobuf";
+option go_package = "/users;userproto";
 
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);

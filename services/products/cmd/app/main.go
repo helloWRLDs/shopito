@@ -9,7 +9,7 @@ import (
 	categoryrepository "shopito/services/products/internal/repository/category"
 	productrepository "shopito/services/products/internal/repository/product"
 	productservice "shopito/services/products/internal/services"
-	"shopito/services/products/protobuf"
+	"shopito/pkg/protobuf/products"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -34,7 +34,7 @@ func main() {
 	)
 	delivery := delivery.New(service)
 
-	protobuf.RegisterProductServiceServer(srv, delivery)
+	productproto.RegisterProductServiceServer(srv, delivery)
 
 	logrus.WithField("addr", config.ADDR).Info("server started")
 	if err := srv.Serve(lis); err != nil {

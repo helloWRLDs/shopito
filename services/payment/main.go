@@ -1,14 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"shopito/pkg/datastore/postgres"
 	"shopito/pkg/types/errors"
 	jsonutil "shopito/pkg/util/json"
-	cfg "shopito/services/notifier/config"
+	emailcfg "shopito/services/notifier/config"
 	"shopito/services/payment/models"
+	appcfg "shopito/services/users/config"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -24,12 +27,20 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-const (
+var (
 	ADDR = ":3010"
+	DB   *sql.DB
 )
 
-func main() {
+func init() {
+	db, err := postgres.Open(appcfg.DB.HOST, appcfg.DB.PORT, appcfg.DB.USER, appcfg.DB.PASSWORD, appcfg.DB.NAME)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	DB = db
+}
 
+func main() {
 	router := chi.NewRouter()
 	router.Post("/cart", func(w http.ResponseWriter, r *http.Request) {
 		jsonutil.EncodeJson(w, 200, "item added to cart")
@@ -41,10 +52,11 @@ func main() {
 			return
 		}
 		ProcessPayment(models.ReceiptData{CompanyName: "Shopito", Items: Cart.Items, Customer: Cart.Name, Date: time.Now()})
-		if err := sendEmailWithAttachment(Cart.Email); err != nil {
+		if err := SendEmailWithAttachment(Cart.Email); err != nil {
 			jsonutil.EncodeJson(w, 400, "Couldn't send email")
 			return
 		}
+		CachePayment(models.ReceiptData{CompanyName: "Shopito", Items: Cart.Items, Customer: Cart.Name, Date: time.Now()}, Cart.Email)
 		jsonutil.EncodeJson(w, 200, "Success")
 	})
 	logrus.WithField("addr", ADDR).Info("server started")
@@ -58,25 +70,37 @@ func main() {
 	}
 }
 
-func sendEmailWithAttachment(to string) error {
+func CachePayment(data models.ReceiptData, email string) error {
+	stmt := `INSERT INTO payments(email, total_price, date) VALUES ($1, $2, $3);`
+	total_price := 0
+	for _, item := range data.Items {
+		total_price += item.Price
+	}
+	_, err := DB.Exec(stmt, email, total_price, data.Date)
+	return err
+}
+
+func SendEmailWithAttachment(to string) error {
 	m := gomail.NewMessage()
-	m.SetHeader("From", cfg.EMAIL.USERNAME)
+	m.SetHeader("From", emailcfg.EMAIL.USERNAME)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", "Your Receipt")
 	m.SetBody("text/plain", "Thank you for your purchase. Please find your receipt attached.")
 
 	m.Attach("docs/receipt.pdf")
-
-	d := gomail.NewDialer(cfg.EMAIL.HOST, 587, cfg.EMAIL.USERNAME, cfg.EMAIL.PASSWORD)
+	logrus.Info("sending receipt...")
+	d := gomail.NewDialer(emailcfg.EMAIL.HOST, 587, emailcfg.EMAIL.USERNAME, emailcfg.EMAIL.PASSWORD)
 
 	if err := d.DialAndSend(m); err != nil {
+		logrus.Error("error sending receipt")
 		return err
 	}
+	logrus.Info("receipt sent successfuly")
 	return nil
 }
 
 func ProcessPayment(receiptData models.ReceiptData) {
-	fmt.Println("Processing payment...")
+	logrus.Info("processing payment...")
 	m := maroto.New(config.NewBuilder().
 		WithPageNumber().
 		WithLeftMargin(10).
@@ -85,7 +109,6 @@ func ProcessPayment(receiptData models.ReceiptData) {
 		Build(),
 	)
 
-	// Adding the header
 	m.AddRow(20,
 		col.New(6).Add(
 			text.New(receiptData.CompanyName,
@@ -110,7 +133,6 @@ func ProcessPayment(receiptData models.ReceiptData) {
 		})),
 	)
 
-	// Adding the customer information
 	m.AddRow(10,
 		col.New(12).Add(text.New(fmt.Sprintf("Customer: %v", receiptData.Customer), props.Text{
 			Top:   3,
@@ -118,13 +140,11 @@ func ProcessPayment(receiptData models.ReceiptData) {
 			Style: fontstyle.Bold,
 		})))
 
-	// Adding the table header
 	m.AddRow(10,
 		col.New(6).Add(text.New("Item", props.Text{
 			Top:   3,
 			Size:  12,
 			Style: fontstyle.Bold,
-			// Align: align.Right,
 		})),
 		col.New(3).Add(text.New("Quantity", props.Text{
 			Top:   3,
@@ -140,7 +160,6 @@ func ProcessPayment(receiptData models.ReceiptData) {
 		})),
 	)
 
-	// Adding the table content
 	total := 0
 	for _, item := range receiptData.Items {
 		total += item.Price
