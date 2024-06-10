@@ -1,0 +1,29 @@
+{
+    "version": "2",
+    "sql": [
+        {
+            "engine": "postgresql",
+            "queries": "./sqlc/user/query.sql",
+            "schema": "./sqlc/user/schema.sql",
+            "gen": {
+                "go": {
+                    "package": "repository",
+                    "out": "./services/users/internal/repository",
+                    "sql_package": "lib/pq"
+                }
+            }
+        },
+        {
+            "engine": "postgresql",
+            "queries": "./sqlc/product/query.sql",
+            "schema": "./sqlc/product/schema.sql",
+            "gen": {
+                "go": {
+                    "package": "productrepository",
+                    "out": "./services/products/internal/repository/product",
+                    "sql_package": "lib/pq"
+                }
+            }
+        }
+    ]
+}
