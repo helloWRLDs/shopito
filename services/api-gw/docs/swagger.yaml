@@ -1,0 +1,220 @@
+basePath: /api/v1
+definitions:
+  errors.HTTPError:
+    properties:
+      err:
+        type: string
+      msg:
+        type: string
+      status:
+        type: integer
+    type: object
+  response.JsonMessage:
+    properties:
+      msg:
+        type: string
+      status:
+        type: integer
+    type: object
+  userproto.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  userproto.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      is_admin:
+        type: boolean
+      is_verified:
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API Endpoints that connects GRPC and REST endpoints
+  title: Shopito API Gateway
+  version: 1.0.0
+paths:
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: List Users with parameters
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/userproto.User'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      summary: List Users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create New User
+      parameters:
+      - description: New User Body
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/userproto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JsonMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      summary: Create User
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JsonMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      summary: Delete User
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Get user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JsonMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      summary: Get User
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated user body
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/userproto.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JsonMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      summary: Update User
+      tags:
+      - Users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

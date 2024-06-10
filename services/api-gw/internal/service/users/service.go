@@ -2,8 +2,9 @@ package userservice
 
 import (
 	"context"
+	"fmt"
+	userproto "shopito/pkg/protobuf/users"
 	"shopito/services/api-gw/config"
-	"shopito/services/api-gw/protobuf"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -12,16 +13,16 @@ import (
 )
 
 type Service interface {
-	GetUserService(id int64) (*protobuf.GetUserResponse, error)
-	ListUsersService() (*protobuf.GetUsersResponse, error)
-	CreateUserService(user *protobuf.CreateUserRequest) (int64, error)
+	GetUserService(id int64) (*userproto.User, error)
+	ListUsersService() (*userproto.GetUsersResponse, error)
+	CreateUserService(user *userproto.CreateUserRequest) (int64, error)
 	Close()
-	// UpdateUserService()
+	UpdateUserService(id int64, user *userproto.User) error
 	DeleteUserService(id int64) error
 }
 
 type UserService struct {
-	clientGRPC protobuf.UserServiceClient
+	clientGRPC userproto.UserServiceClient
 	conn       *grpc.ClientConn
 }
 
@@ -30,7 +31,8 @@ func New() *UserService {
 	if err != nil {
 		logrus.Fatalf("did not connect: %v", err)
 	}
-	client := protobuf.NewUserServiceClient(conn)
+	logrus.Info("user service conn established")
+	client := userproto.NewUserServiceClient(conn)
 	return &UserService{
 		clientGRPC: client,
 		conn:       conn,
@@ -41,11 +43,11 @@ func (s *UserService) DeleteUserService(id int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := s.clientGRPC.DeleteUser(ctx, &protobuf.DeleteUserRequest{Id: id})
+	_, err := s.clientGRPC.DeleteUser(ctx, &userproto.DeleteUserRequest{Id: id})
 	return err
 }
 
-func (s *UserService) CreateUserService(user *protobuf.CreateUserRequest) (int64, error) {
+func (s *UserService) CreateUserService(user *userproto.CreateUserRequest) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -53,20 +55,32 @@ func (s *UserService) CreateUserService(user *protobuf.CreateUserRequest) (int64
 	return r.GetId(), err
 }
 
-func (s *UserService) GetUserService(id int64) (*protobuf.GetUserResponse, error) {
+func (s *UserService) GetUserService(id int64) (*userproto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	r, err := s.clientGRPC.GetUser(ctx, &protobuf.GetUserRequest{Id: id})
+	r, err := s.clientGRPC.GetUser(ctx, &userproto.GetUserRequest{Id: id})
+	fmt.Println(r.GetUser().GetEmail())
+	return r.GetUser(), err
+}
+
+func (s *UserService) ListUsersService() (*userproto.GetUsersResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	r, err := s.clientGRPC.GetUsers(ctx, &userproto.GetUsersRequest{})
 	return r, err
 }
 
-func (s *UserService) ListUsersService() (*protobuf.GetUsersResponse, error) {
+func (s *UserService) UpdateUserService(id int64, user *userproto.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	r, err := s.clientGRPC.GetUsers(ctx, &protobuf.GetUsersRequest{})
-	return r, err
+	_, err := s.clientGRPC.UpdateUser(ctx, &userproto.UpdateUserRequest{
+		Id:   id,
+		User: user,
+	})
+	return err
 }
 
 func (s *UserService) Close() {

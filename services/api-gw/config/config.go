@@ -20,7 +20,6 @@ func init() {
 		logrus.WithError(err).Panic("config load err")
 	}
 	ADDR = os.Getenv("GW_ADDR")
-	// USERS_ADDR = os.Getenv("USERS_ADDR")
 	USERS_ADDR = os.Getenv("USERS_ADDR")
 	PRODUCTS_ADDR = os.Getenv("PRODUCTS_ADDR")
 	JWT = &Jwt{
