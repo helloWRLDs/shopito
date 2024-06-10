@@ -2,8 +2,8 @@ package delivery
 
 import (
 	"context"
+	notifierproto "shopito/pkg/protobuf/notifier"
 	"shopito/services/notifier/internal/service"
-	"shopito/pkg/protobuf/notifier"
 )
 
 type Delivery struct {
@@ -19,7 +19,6 @@ func New(serv *service.NotifierService) *Delivery {
 
 func (d *Delivery) SendEmail(ctx context.Context, request *notifierproto.SendEmailRequest) (*notifierproto.SendEmailResponse, error) {
 	response := &notifierproto.SendEmailResponse{Success: false}
-
 	err := d.serv.SendEmailService(request.GetTo(), request.GetSubject(), request.GetBody())
 	if err != nil {
 		return response, err
@@ -30,8 +29,7 @@ func (d *Delivery) SendEmail(ctx context.Context, request *notifierproto.SendEma
 
 func (d *Delivery) SendAllEmail(ctx context.Context, request *notifierproto.SendAllEmailRequest) (*notifierproto.SendAllEmailResponse, error) {
 	response := &notifierproto.SendAllEmailResponse{Success: false}
-	
-	err := d.serv.SendAllEmailService(request.GetSubject(), request.GetBody())
+	err := d.serv.SendAllEmailService(request.GetSubject(), request.GetBody(), request.GetEmails())
 	if err != nil {
 		return response, err
 	}

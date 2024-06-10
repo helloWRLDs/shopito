@@ -9,7 +9,7 @@ import (
 	"shopito/services/users/internal/repository"
 	"shopito/services/users/internal/service"
 
-	"shopito/pkg/protobuf/users"
+	userproto "shopito/pkg/protobuf/users"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

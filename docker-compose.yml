@@ -17,71 +17,73 @@ services:
     networks:
       - webnet
   
-  # products-service:
-  #   container_name: products-service
-  #   image: products-service
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: products-service
-  #   ports:
-  #     - "3007:3007"
-  #   environment:
-  #     DB_HOST: postgres
-  #   cpus: 0.125
-  #   mem_limit: 128m
-  #   networks:
-  #     - webnet
+  products-service:
+    container_name: products-service
+    image: products-service
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: products-service
+    ports:
+      - "3007:3007"
+    environment:
+      DB_HOST: postgres
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
 
-  # users-service:
-  #   container_name: users-service
-  #   image: users-service
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: users-service
-  #   ports:
-  #     - "3002:3002"
-  #   environment:
-  #     DB_HOST: postgres
-  #   cpus: 0.125
-  #   mem_limit: 128m
-  #   networks:
-  #     - webnet
+  users-service:
+    container_name: users-service
+    image: users-service
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: users-service
+    ports:
+      - "${USERS_ADDR}:3002"
+    environment:
+      DB_HOST: postgres
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
+    depends_on:
+      - db
   
-  # notifier-service:
-  #   container_name: notifier-service
-  #   image: notifier-service
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: notifier-service
-  #   ports:
-  #     - "3003:3003"
-  #   cpus: 0.125
-  #   mem_limit: 128m
-  #   networks:
-  #     - webnet
+  notifier-service:
+    container_name: notifier-service
+    image: notifier-service
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: notifier-service
+    ports:
+      - "3003:3003"
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
   
-  # api-gateway:
-  #   container_name: api-gateway
-  #   image: api-gateway
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: api-gateway
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     DB_HOST: postgres
-  #     AUTH_ADDR: :3001
-  #     USERS_ADDR: users-service:3002
-  #     PRODUCTS_ADDR: productrs-service:3006
+  api-gateway:
+    container_name: api-gateway
+    image: api-gateway
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      AUTH_ADDR: :3001
+      USERS_ADDR: users-service${USERS_ADDR}
+      PRODUCTS_ADDR: productrs-service${PRODUCTS_ADDR}
 
-  #   cpus: 0.125
-  #   mem_limit: 128m
-  #   networks:
-  #     - webnet
+    cpus: 0.125
+    mem_limit: 128m
+    networks:
+      - webnet
 
 volumes:
   pgdata:

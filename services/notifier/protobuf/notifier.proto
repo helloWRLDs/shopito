@@ -22,6 +22,7 @@ message SendEmailResponse {
 message SendAllEmailRequest {
     string subject = 1;
     string body = 2;
+    repeated string emails = 3;
 }
 
 message SendAllEmailResponse {

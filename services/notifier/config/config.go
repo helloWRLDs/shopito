@@ -10,7 +10,6 @@ import (
 var (
 	ADDR       string
 	EMAIL      *Email
-	USERS_ADDR string
 )
 
 func init() {
@@ -19,7 +18,6 @@ func init() {
 		panic(err)
 	}
 	ADDR = os.Getenv("NOTIFIER_ADDR")
-	USERS_ADDR = os.Getenv("USERS_ADDR")
 	EMAIL = &Email{
 		HOST:     os.Getenv("EMAIL_HOST"),
 		PORT:     os.Getenv("EMAIL_PORT"),

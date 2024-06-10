@@ -1,22 +1,16 @@
 package service
 
 import (
-	"context"
-	userproto "shopito/pkg/protobuf/users"
-	"shopito/services/notifier/config"
 	"shopito/services/notifier/internal/adapter"
-	"time"
 
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 )
 
 type Service interface {
 	SendEmailService(to, subject, body string) error
-	SendAllEmailService(subject, body string) error
+	SendAllEmailService(subject, body string, emails []string) error
 }
 
 type NotifierService struct {
@@ -36,25 +30,10 @@ func (s *NotifierService) SendEmailService(to, subject, body string) error {
 	return nil
 }
 
-func (s *NotifierService) SendAllEmailService(subject, body string) error {
-	conn, err := grpc.NewClient(config.USERS_ADDR, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return status.Errorf(codes.Unavailable, "Users service is unavailable")
-	}
-	defer conn.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	c := userproto.NewUserServiceClient(conn)
-	r, err := c.GetUsers(ctx, &userproto.GetUsersRequest{})
-	if err != nil {
-		return status.Errorf(codes.Unavailable, "Users service is unavailable")
-	}
-	users := r.Users
-	for _, user := range users {
-		if err := s.adapter.SendEmail(user.Email, subject, body); err != nil {
-			logrus.WithField("email", user.Email).Warn("email is not valid(might be deleted from db)")
+func (s *NotifierService) SendAllEmailService(subject, body string, emails []string) error {
+	for _, email := range emails {
+		if err := s.adapter.SendEmail(email, subject, body); err != nil {
+			logrus.WithField("email", email).Warn("email is not valid(might be deleted from db)")
 		}
 	}
 	return nil

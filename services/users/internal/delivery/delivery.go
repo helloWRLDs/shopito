@@ -2,8 +2,8 @@ package delivery
 
 import (
 	"context"
+	userproto "shopito/pkg/protobuf/users"
 	"shopito/services/users/internal/service"
-	"shopito/pkg/protobuf/users"
 )
 
 type Delivery struct {
@@ -80,5 +80,12 @@ func (d *Delivery) GetUsers(ctx context.Context, request *userproto.GetUsersRequ
 }
 
 func (d *Delivery) UpdateUser(ctx context.Context, request *userproto.UpdateUserRequest) (*userproto.UpdateUserResponse, error) {
-	return nil, nil
+	response := userproto.UpdateUserResponse{
+		Success: false,
+	}
+	if err := d.serv.UpdateUserService(request.GetId(), request.GetUser()); err != nil {
+		return &response, err
+	}
+	response.Success = true
+	return &response, nil
 }
