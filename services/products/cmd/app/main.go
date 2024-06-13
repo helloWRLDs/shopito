@@ -4,12 +4,11 @@ import (
 	"net"
 	"shopito/pkg/datastore/postgres"
 	"shopito/pkg/log"
+	productproto "shopito/pkg/protobuf/products"
+	"shopito/services/products/internal/services"
 	"shopito/services/products/config"
 	"shopito/services/products/internal/delivery"
-	categoryrepository "shopito/services/products/internal/repository/category"
-	productrepository "shopito/services/products/internal/repository/product"
-	productservice "shopito/services/products/internal/services"
-	"shopito/pkg/protobuf/products"
+	"shopito/services/products/internal/repository"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -28,10 +27,8 @@ func main() {
 	}
 	srv := grpc.NewServer()
 
-	service := productservice.New(
-		productrepository.New(db),
-		categoryrepository.New(db),
-	)
+	repository := repository.New(db)
+	service := service.New(repository)
 	delivery := delivery.New(service)
 
 	productproto.RegisterProductServiceServer(srv, delivery)
