@@ -19,8 +19,8 @@
             "schema": "./sqlc/product/schema.sql",
             "gen": {
                 "go": {
-                    "package": "productrepository",
-                    "out": "./services/products/internal/repository/product",
+                    "package": "repository",
+                    "out": "./services/products/internal/repository",
                     "sql_package": "lib/pq"
                 }
             }

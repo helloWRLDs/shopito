@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.25.0
 
-package productrepository
+package repository
 
 import (
 	"database/sql"
@@ -15,9 +15,9 @@ type Category struct {
 
 type Product struct {
 	ID         int64
-	Name       sql.NullString
+	Name       string
 	ImgUrl     sql.NullString
-	Price      sql.NullInt32
-	Stock      sql.NullInt32
-	CategoryID sql.NullInt32
+	Price      int32
+	Stock      int32
+	CategoryID sql.NullInt64
 }

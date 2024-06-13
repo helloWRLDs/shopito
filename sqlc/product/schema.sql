@@ -5,10 +5,10 @@ CREATE TABLE categories(
 
 CREATE TABLE products (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255),
+    name VARCHAR(255) NOT NULL,
     img_url VARCHAR(255),
-    price INT,
-    stock INT,
-    category_id INT DEFAULT 0 REFERENCES categories(id) ON DELETE CASCADE
+    price INT NOT NULL,
+    stock INT NOT NULL,
+    category_id BIGINT DEFAULT 0 REFERENCES categories(id) ON DELETE CASCADE
 );
 

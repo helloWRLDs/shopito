@@ -36,6 +36,10 @@ func (s *UserService) DeleteUserService(id int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5*time.Second))
 	defer cancel()
 
+	if id == 0 {
+		return status.Errorf(codes.PermissionDenied, "Denied")
+	}
+
 	exists, err := s.repo.IsExistByID(ctx, id)
 	if err != nil || !exists {
 		return status.Errorf(codes.Internal, "Not found")
@@ -132,13 +136,15 @@ func (s *UserService) InsertUserService(user *userproto.User) (int64, error) {
 		return -1, status.Errorf(codes.InvalidArgument, "Password is too long")
 	}
 	newUser.Password = string(hashedPassword)
+
 	exist, err := s.repo.IsExistByEmail(ctx, newUser.Email)
-	if !exist {
-		return -1, status.Errorf(codes.AlreadyExists, "User with such email already exists")
-	} else if err != nil {
+	if err != nil {
 		logrus.WithError(err).Error("Internal Server Error")
 		return -1, status.Errorf(codes.Internal, "Internal Server Error")
+	} else if exist {
+		return -1, status.Errorf(codes.AlreadyExists, "User with such email already exists")
 	}
+
 	id, err := s.repo.CreateUser(ctx, newUser)
 	if err != nil {
 		logrus.WithError(err).Error("Internal Server Error")
@@ -150,6 +156,10 @@ func (s *UserService) InsertUserService(user *userproto.User) (int64, error) {
 func (s *UserService) UpdateUserService(id int64, user *userproto.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10*time.Second))
 	defer cancel()
+
+	if id == 0 {
+		return status.Errorf(codes.PermissionDenied, "Denied")
+	}
 
 	updatedUser := repository.UpdateUserParams{
 		ID:         id,

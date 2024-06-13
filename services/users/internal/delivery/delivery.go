@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"context"
+	"fmt"
 	userproto "shopito/pkg/protobuf/users"
 	"shopito/services/users/internal/service"
 )
@@ -57,6 +58,7 @@ func (d *Delivery) GetUserByEmail(ctx context.Context, request *userproto.GetUse
 }
 
 func (d *Delivery) GetUser(ctx context.Context, request *userproto.GetUserRequest) (*userproto.GetUserResponse, error) {
+	fmt.Println(request.GetId())
 	user, err := d.serv.GetUserService(request.GetId())
 	if err != nil {
 		return nil, err
