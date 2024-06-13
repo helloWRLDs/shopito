@@ -76,9 +76,9 @@ services:
       - "3000:3000"
     environment:
       DB_HOST: postgres
-      AUTH_ADDR: :3001
+      # AUTH_ADDR: :3001
       USERS_ADDR: users-service${USERS_ADDR}
-      PRODUCTS_ADDR: productrs-service${PRODUCTS_ADDR}
+      PRODUCTS_ADDR: products-service${PRODUCTS_ADDR}
 
     cpus: 0.125
     mem_limit: 128m

@@ -9,6 +9,7 @@ func (c *UserController) Routes() chi.Router {
 	r.Get("/", c.ListUsersController)
 	r.Post("/", c.CreateUserController)
 	r.Delete("/{id}", c.DeleteUserController)
+	r.Put("/{id}", c.UpdateUserController)
 
 	return r
 }

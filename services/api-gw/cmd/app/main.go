@@ -8,8 +8,10 @@ import (
 	"shopito/pkg/log"
 	jsonutil "shopito/pkg/util/json"
 	"shopito/services/api-gw/config"
+	authcontroller "shopito/services/api-gw/internal/delivery/auth"
 	"shopito/services/api-gw/internal/delivery/middleware"
 	usercontroller "shopito/services/api-gw/internal/delivery/user"
+	authservice "shopito/services/api-gw/internal/service/auth"
 	userservice "shopito/services/api-gw/internal/service/users"
 	"syscall"
 	"time"
@@ -32,14 +34,14 @@ import (
 func main() {
 	log.Init("api_gw")
 	userService := userservice.New()
+	authService := authservice.New()
 	// adminService := adminservice.New()
 	// productService := productservice.New()
-	// authService := authservice.New()
 
 	userDelivery := usercontroller.New(userService)
+	authDelivery := authcontroller.New(authService)
 	// adminDelivery := admincontroller.New(adminService)
 	// productDelivery := productcontroller.New(productService)
-	// authDelivery := authcontroller.New(authService)
 
 	router := chi.NewRouter()
 
@@ -52,17 +54,17 @@ func main() {
 	router.With(middleware.LogRequest, middleware.SecureHeaders).
 		Route("/api/v1", func(r chi.Router) {
 			r.Mount("/users", userDelivery.Routes())
+			r.Mount("/auth", authDelivery.Routes())
 			// r.Mount("/admin", adminDelivery.Routes())
 			// r.Mount("/products", productDelivery.ProductRoutes())
-			// r.Mount("/auth", authDelivery.Routes())
 		})
 
 	srv := http.Server{
 		Addr:         config.ADDR,
 		Handler:      router,
 		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 15 * time.Second,
 	}
 
 	quit := make(chan os.Signal, 1)
@@ -76,16 +78,16 @@ func main() {
 	}()
 
 	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	logrus.Println("Server is shutting down...")
 
 	// Closing grpc connections
 	userService.Close()
+	authService.Close()
 	// adminService.Close()
 	// productService.Close()
-	// authService.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
 		logrus.Fatalf("Server forced to shutdown: %v", err)

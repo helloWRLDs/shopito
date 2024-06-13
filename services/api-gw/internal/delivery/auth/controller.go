@@ -1,51 +1,89 @@
 package authcontroller
 
-// import (
-// 	"net/http"
-// 	"shopito/pkg/types/errors"
-// 	grpcutil "shopito/pkg/util/grpc"
-// 	jsonutil "shopito/pkg/util/json"
-// 	authservice "shopito/services/api-gw/internal/service/auth"
-// 	"shopito/pkg/services/api-gw/protobuf"
+import (
+	"fmt"
+	"net/http"
+	userproto "shopito/pkg/protobuf/users"
+	"shopito/pkg/types/errors"
+	"shopito/pkg/types/response"
+	grpcutil "shopito/pkg/util/grpc"
+	jsonutil "shopito/pkg/util/json"
+	authservice "shopito/services/api-gw/internal/service/auth"
 
-// 	"github.com/go-chi/chi"
-// )
+	"github.com/go-chi/chi"
+)
 
-// type AuthController struct {
-// 	service authservice.Service
-// }
+type AuthController struct {
+	service authservice.Service
+}
 
-// func New(service *authservice.AuthService) *AuthController {
-// 	return &AuthController{
-// 		service: service,
-// 	}
-// }
+func New(service *authservice.AuthService) *AuthController {
+	return &AuthController{
+		service: service,
+	}
+}
 
-// func (c *AuthController) Routes() chi.Router {
-// 	r := chi.NewRouter()
+func (c *AuthController) Routes() chi.Router {
+	r := chi.NewRouter()
 
-// 	r.Post("/login", c.LoginController)
-// 	r.Post("/register", c.RegisterController)
+	r.Post("/login", c.LoginController)
+	r.Post("/register", c.RegisterController)
 
-// 	return r
-// }
+	return r
+}
 
-// func (c *AuthController) LoginController(w http.ResponseWriter, r *http.Request) {
+// @Summary 	Login User
+// @Tags 		Auth
+// @Description Authenticate and Authorize User
+// @Accept		json
+// @Produce 	json
+// @Param 		email	body	string  true  "email"
+// @Param 		password	body	string  true  "password"
+// @Success     200 {object} response.JsonMessage "OK"
+// @Failure     422 {object} errors.HTTPError "Unprocessable entity"
+// @Failure 	404 {object} errors.HTTPError "Not Found"
+// @Failure     500 {object} errors.HTTPError "Internal server error"
+// @Router /auth/login [post]
+func (c *AuthController) LoginController(w http.ResponseWriter, r *http.Request) {
 
-// 	user, err := jsonutil.DecodeJson[protobuf.CreateUserRequest](r)
-// 	if err != nil {
-// 		errors.SendErr(w, errors.ErrUnpocessableEntity.SetMessage("Couldn't process the user data"))
-// 		return
-// 	}
-// 	token, err := c.service.LoginUserService(&user)
-// 	if err != nil {
-// 		status, msg := grpcutil.GRPCToHTTPError(err)
-// 		jsonutil.EncodeJson(w, status, msg)
-// 		return
-// 	}
-// 	jsonutil.EncodeJson(w, 200, token)
-// }
+	user, err := jsonutil.DecodeJson[userproto.CreateUserRequest](r)
+	if err != nil {
+		errors.SendErr(w, errors.ErrUnpocessableEntity.SetMessage("Couldn't process the user data"))
+		return
+	}
+	token, err := c.service.LoginUserService(&user)
+	if err != nil {
+		status, msg := grpcutil.GRPCToHTTPError(err)
+		jsonutil.EncodeJson(w, status, msg)
+		return
+	}
+	jsonutil.EncodeJson(w, 200, response.NewJsonMessage(200, *token))
+}
 
-// func (c *AuthController) RegisterController(w http.ResponseWriter, r *http.Request) {
-
-// }
+// @Summary 	Register User
+// @Tags 		Auth
+// @Description Register New User
+// @Accept		json
+// @Produce 	json
+// @Param 		name	body	string  true  "name"
+// @Param 		email	body	string  true  "email"
+// @Param 		password	body	string  true  "password"
+// @Success     200 {object} response.JsonMessage "OK"
+// @Failure     422 {object} errors.HTTPError "Unprocessable entity"
+// @Failure 	404 {object} errors.HTTPError "Not Found"
+// @Failure     500 {object} errors.HTTPError "Internal server error"
+// @Router /auth/register [post]
+func (c *AuthController) RegisterController(w http.ResponseWriter, r *http.Request) {
+	newUser, err := jsonutil.DecodeJson[userproto.CreateUserRequest](r)
+	if err != nil {
+		jsonutil.EncodeJson(w, 400, "Invalid Credentails")
+		return
+	}
+	id, err := c.service.RegisterUserService(&newUser)
+	if err != nil {
+		status, msg := grpcutil.GRPCToHTTPError(err)
+		jsonutil.EncodeJson(w, status, msg)
+		return
+	}
+	jsonutil.EncodeJson(w, 201, response.NewJsonMessage(201, fmt.Sprintf("user registered with id=%v", id)))
+}
