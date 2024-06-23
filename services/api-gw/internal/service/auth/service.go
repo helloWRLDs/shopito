@@ -2,58 +2,47 @@ package authservice
 
 import (
 	"context"
-	userproto "shopito/pkg/protobuf/users"
+	protouser "shopito/pkg/protobuf/user"
 	jwtutil "shopito/pkg/util/jwt"
-	"shopito/services/api-gw/config"
+	userclient "shopito/services/api-gw/internal/client/users"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 )
 
 type Service interface {
-	RegisterUserService(user *userproto.CreateUserRequest) (int64, error)
-	LoginUserService(user *userproto.CreateUserRequest) (*string, error)
-	Close()
+	RegisterUserService(user *protouser.CreateUserRequest) (int64, error)
+	LoginUserService(user *protouser.CreateUserRequest) (*string, error)
 }
 
 type AuthService struct {
-	clientGRPC userproto.UserServiceClient
-	conn       *grpc.ClientConn
+	client *userclient.UserClient
 }
 
-func New() *AuthService {
-	conn, err := grpc.NewClient(config.USERS_ADDR, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		logrus.Fatalf("did not connect: %v", err)
-	}
-	client := userproto.NewUserServiceClient(conn)
+func New(client *userclient.UserClient) *AuthService {
 	return &AuthService{
-		clientGRPC: client,
-		conn:       conn,
+		client: client,
 	}
 }
 
-func (s *AuthService) RegisterUserService(user *userproto.CreateUserRequest) (int64, error) {
+func (s *AuthService) RegisterUserService(user *protouser.CreateUserRequest) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	response, err := s.clientGRPC.CreateUser(ctx, user)
+	response, err := s.client.GRPC.CreateUser(ctx, user)
 	if err != nil {
 		return -1, err
 	}
 	return response.GetId(), nil
 }
 
-func (s *AuthService) LoginUserService(user *userproto.CreateUserRequest) (*string, error) {
+func (s *AuthService) LoginUserService(user *protouser.CreateUserRequest) (*string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	existingUser, err := s.clientGRPC.GetUserByEmail(ctx, &userproto.GetUserByEmailRequest{Email: user.GetEmail()})
+	existingUser, err := s.client.GRPC.GetUserByEmail(ctx, &protouser.GetUserByEmailRequest{Email: user.GetEmail()})
 	if err != nil {
 		return nil, err
 	}
@@ -66,13 +55,4 @@ func (s *AuthService) LoginUserService(user *userproto.CreateUserRequest) (*stri
 		return nil, status.Errorf(codes.InvalidArgument, "Incorrect Credentials")
 	}
 	return token, nil
-}
-
-func (s *AuthService) Close() {
-	err := s.conn.Close()
-	if err != nil {
-		logrus.WithError(err).Error("Couldn't close users service grpc connection")
-	} else {
-		logrus.Info("users service grpc conn closed")
-	}
 }

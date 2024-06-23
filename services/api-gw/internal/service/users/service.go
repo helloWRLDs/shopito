@@ -2,40 +2,26 @@ package userservice
 
 import (
 	"context"
-	"fmt"
-	userproto "shopito/pkg/protobuf/users"
-	"shopito/services/api-gw/config"
+	protouser "shopito/pkg/protobuf/user"
+	userclient "shopito/services/api-gw/internal/client/users"
 	"time"
-
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Service interface {
-	GetUserService(id int64) (*userproto.User, error)
-	ListUsersService() (*userproto.GetUsersResponse, error)
-	CreateUserService(user *userproto.CreateUserRequest) (int64, error)
-	Close()
-	UpdateUserService(id int64, user *userproto.User) error
+	GetUserService(id int64) (*protouser.User, error)
+	ListUsersService() (*protouser.ListUsersResponse, error)
+	CreateUserService(user *protouser.CreateUserRequest) (int64, error)
+	UpdateUserService(id int64, user *protouser.User) error
 	DeleteUserService(id int64) error
 }
 
 type UserService struct {
-	clientGRPC userproto.UserServiceClient
-	conn       *grpc.ClientConn
+	client *userclient.UserClient
 }
 
-func New() *UserService {
-	conn, err := grpc.NewClient(config.USERS_ADDR, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		logrus.Fatalf("did not connect: %v", err)
-	}
-	logrus.Info("user service conn established")
-	client := userproto.NewUserServiceClient(conn)
+func New(client *userclient.UserClient) *UserService {
 	return &UserService{
-		clientGRPC: client,
-		conn:       conn,
+		client: client,
 	}
 }
 
@@ -43,51 +29,41 @@ func (s *UserService) DeleteUserService(id int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := s.clientGRPC.DeleteUser(ctx, &userproto.DeleteUserRequest{Id: id})
+	_, err := s.client.GRPC.DeleteUser(ctx, &protouser.DeleteUserRequest{Id: id})
 	return err
 }
 
-func (s *UserService) CreateUserService(user *userproto.CreateUserRequest) (int64, error) {
+func (s *UserService) CreateUserService(user *protouser.CreateUserRequest) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	r, err := s.clientGRPC.CreateUser(ctx, user)
+	r, err := s.client.GRPC.CreateUser(ctx, user)
 	return r.GetId(), err
 }
 
-func (s *UserService) GetUserService(id int64) (*userproto.User, error) {
+func (s *UserService) GetUserService(id int64) (*protouser.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	r, err := s.clientGRPC.GetUser(ctx, &userproto.GetUserRequest{Id: id})
-	fmt.Println(r.GetUser().GetEmail())
+	r, err := s.client.GRPC.GetUserByID(ctx, &protouser.GetUserByIDRequest{Id: id})
 	return r.GetUser(), err
 }
 
-func (s *UserService) ListUsersService() (*userproto.GetUsersResponse, error) {
+func (s *UserService) ListUsersService() (*protouser.ListUsersResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	r, err := s.clientGRPC.GetUsers(ctx, &userproto.GetUsersRequest{})
+	r, err := s.client.GRPC.ListUsers(ctx, &protouser.ListUsersRequest{})
 	return r, err
 }
 
-func (s *UserService) UpdateUserService(id int64, user *userproto.User) error {
+func (s *UserService) UpdateUserService(id int64, user *protouser.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := s.clientGRPC.UpdateUser(ctx, &userproto.UpdateUserRequest{
+	_, err := s.client.GRPC.UpdateUser(ctx, &protouser.UpdateUserRequest{
 		Id:   id,
 		User: user,
 	})
 	return err
-}
-
-func (s *UserService) Close() {
-	err := s.conn.Close()
-	if err != nil {
-		logrus.WithError(err).Error("Couldn't close users service grpc connection")
-	} else {
-		logrus.Info("users service grpc conn closed")
-	}
 }

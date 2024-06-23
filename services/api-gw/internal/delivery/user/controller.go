@@ -3,7 +3,7 @@ package usercontroller
 import (
 	"fmt"
 	"net/http"
-	userproto "shopito/pkg/protobuf/users"
+	protouser "shopito/pkg/protobuf/user"
 	"shopito/pkg/types/errors"
 	"shopito/pkg/types/response"
 	grpcutil "shopito/pkg/util/grpc"
@@ -79,7 +79,7 @@ func (c *UserController) GetUserController(w http.ResponseWriter, r *http.Reques
 // @Description List Users with parameters
 // @Accept		json
 // @Produce 	json
-// @Success     200 							{array}		userproto.User "OK"
+// @Success     200 							{array}		protouser.User "OK"
 // @Failure     422 							{object} 	errors.HTTPError "Unprocessable entity"
 // @Failure 	404 							{object} 	errors.HTTPError "Not Found"
 // @Failure     500 							{object} 	errors.HTTPError "Internal server error"
@@ -99,14 +99,14 @@ func (c *UserController) ListUsersController(w http.ResponseWriter, r *http.Requ
 // @Description Create New User
 // @Accept		json
 // @Produce 	json
-// @Param 		New User	body	userproto.CreateUserRequest		true  		"New User Body"
+// @Param 		New User	body	protouser.CreateUserRequest		true  		"New User Body"
 // @Success     201 {object} response.JsonMessage "Created"
 // @Failure     422 {object} errors.HTTPError "Unprocessable entity"
 // @Failure 	404 {object} errors.HTTPError "Not Found"
 // @Failure     500 {object} errors.HTTPError "Internal server error"
 // @Router /users [post]
 func (c *UserController) CreateUserController(w http.ResponseWriter, r *http.Request) {
-	user, err := jsonutil.DecodeJson[userproto.CreateUserRequest](r)
+	user, err := jsonutil.DecodeJson[protouser.CreateUserRequest](r)
 	if err != nil {
 		errors.SendErr(w, errors.ErrBadRequest.SetMessage("couldn't process request body"))
 		return
@@ -127,7 +127,7 @@ func (c *UserController) CreateUserController(w http.ResponseWriter, r *http.Req
 // @Accept 			json
 // @Produce 		json
 // @Param 			id				path		int  										true  		"User ID"
-// @Param 			User			body		userproto.User								true  		"Updated user body"
+// @Param 			User			body		protouser.User								true  		"Updated user body"
 // @Success     	200 			{object} 	response.JsonMessage "OK"
 // @Failure     	422 			{object} 	errors.HTTPError "Unprocessable entity"
 // @Failure 		404 			{object} 	errors.HTTPError "Not Found"
@@ -139,7 +139,7 @@ func (c *UserController) UpdateUserController(w http.ResponseWriter, r *http.Req
 		errors.SendErr(w, errors.ErrUnpocessableEntity.SetMessage("couldn't process the id"))
 		return
 	}
-	user, err := jsonutil.DecodeJson[userproto.User](r)
+	user, err := jsonutil.DecodeJson[protouser.User](r)
 	if err != nil {
 		errors.SendErr(w, errors.ErrBadRequest.SetMessage("couldn't process the body"))
 		return

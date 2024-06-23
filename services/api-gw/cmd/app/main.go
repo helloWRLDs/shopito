@@ -8,9 +8,12 @@ import (
 	"shopito/pkg/log"
 	jsonutil "shopito/pkg/util/json"
 	"shopito/services/api-gw/config"
+	userclient "shopito/services/api-gw/internal/client/users"
+	admincontroller "shopito/services/api-gw/internal/delivery/admin"
 	authcontroller "shopito/services/api-gw/internal/delivery/auth"
 	"shopito/services/api-gw/internal/delivery/middleware"
 	usercontroller "shopito/services/api-gw/internal/delivery/user"
+	adminservice "shopito/services/api-gw/internal/service/admin"
 	authservice "shopito/services/api-gw/internal/service/auth"
 	userservice "shopito/services/api-gw/internal/service/users"
 	"syscall"
@@ -33,14 +36,12 @@ import (
 // @name Authorization
 func main() {
 	log.Init("api_gw")
-	userService := userservice.New()
-	authService := authservice.New()
-	// adminService := adminservice.New()
-	// productService := productservice.New()
 
-	userDelivery := usercontroller.New(userService)
-	authDelivery := authcontroller.New(authService)
-	// adminDelivery := admincontroller.New(adminService)
+	userClient := userclient.New()
+
+	userDelivery := usercontroller.New(userservice.New(userClient))
+	authDelivery := authcontroller.New(authservice.New(userClient))
+	adminDelivery := admincontroller.New(adminservice.New(userClient))
 	// productDelivery := productcontroller.New(productService)
 
 	router := chi.NewRouter()
@@ -55,7 +56,7 @@ func main() {
 		Route("/api/v1", func(r chi.Router) {
 			r.Mount("/users", userDelivery.Routes())
 			r.Mount("/auth", authDelivery.Routes())
-			// r.Mount("/admin", adminDelivery.Routes())
+			r.Mount("/admin", adminDelivery.Routes())
 			// r.Mount("/products", productDelivery.ProductRoutes())
 		})
 
@@ -84,10 +85,7 @@ func main() {
 	logrus.Println("Server is shutting down...")
 
 	// Closing grpc connections
-	userService.Close()
-	authService.Close()
-	// adminService.Close()
-	// productService.Close()
+	userClient.Close()
 
 	if err := srv.Shutdown(ctx); err != nil {
 		logrus.Fatalf("Server forced to shutdown: %v", err)

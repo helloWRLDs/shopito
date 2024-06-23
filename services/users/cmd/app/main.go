@@ -4,12 +4,11 @@ import (
 	"net"
 	"shopito/pkg/datastore/postgres"
 	"shopito/pkg/log"
+	protouser "shopito/pkg/protobuf/user"
 	"shopito/services/users/config"
 	"shopito/services/users/internal/delivery"
 	"shopito/services/users/internal/repository"
 	"shopito/services/users/internal/service"
-
-	userproto "shopito/pkg/protobuf/users"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -32,7 +31,7 @@ func main() {
 	service := service.New(repo)
 	delivery := delivery.New(service)
 
-	userproto.RegisterUserServiceServer(srv, delivery)
+	protouser.RegisterUserServiceServer(srv, delivery)
 
 	logrus.WithField("addr", config.ADDR).Info("server started")
 	if err := srv.Serve(lis); err != nil {

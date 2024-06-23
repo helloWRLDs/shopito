@@ -5,7 +5,6 @@
 package repository
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -14,8 +13,8 @@ type User struct {
 	Name       string
 	Email      string
 	Password   string
-	IsAdmin    sql.NullBool
-	IsVerified sql.NullBool
+	IsAdmin    bool
+	IsVerified bool
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

@@ -2,15 +2,28 @@ syntax = "proto3";
 
 package protobuf;
 
-option go_package = "/users;userproto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/user;protouser";
 
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-    rpc GetUser(GetUserRequest) returns (GetUserResponse);
-    rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+    rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse);
     rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
     rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+    rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
     rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse);
+}
+
+message User {
+    int64 id = 1;
+    string name = 2;
+    string email = 3;
+    string password = 4;
+    bool is_admin = 5;
+    bool is_verified = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
 }
 
 message CreateUserRequest {
@@ -20,22 +33,16 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-    int64 id = 1;
-    bool success = 2;
+    bool success = 1;
+    int64 id = 2;
 }
 
-message GetUserRequest {
+message GetUserByIDRequest {
     int64 id = 1;
 }
 
-message GetUserResponse {
+message GetUserByIDResponse {
     User user = 1;
-}
-
-message GetUsersRequest {}
-
-message GetUsersResponse {
-    repeated User users = 1;
 }
 
 message UpdateUserRequest {
@@ -55,19 +62,16 @@ message DeleteUserResponse {
     bool success = 1;
 }
 
+message ListUsersRequest {}
+
+message ListUsersResponse {
+    repeated User users = 1;
+}
+
 message GetUserByEmailRequest {
     string email = 1;
 }
 
 message GetUserByEmailResponse {
     User user = 1;
-}
-
-message User {
-    int64 id = 1;
-    string name = 2;
-    string email = 3;
-    string password = 4;
-    bool is_admin = 5;
-    bool is_verified = 6;
 }

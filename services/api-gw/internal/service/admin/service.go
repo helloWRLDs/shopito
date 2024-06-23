@@ -1,81 +1,64 @@
 package adminservice
 
-// import (
-// 	"context"
-// 	"shopito/services/api-gw/config"
-// 	"shopito/services/api-gw/protobuf"
-// 	"time"
+import (
+	"context"
+	protouser "shopito/pkg/protobuf/user"
+	userclient "shopito/services/api-gw/internal/client/users"
 
-// 	"github.com/sirupsen/logrus"
-// 	"google.golang.org/grpc"
-// 	"google.golang.org/grpc/credentials/insecure"
-// )
+	"github.com/pkg/errors"
+)
 
-// type Service interface {
-// 	PromoteUserService(id string) error
-// 	DemoteUserService(id string) error
-// 	Close() error
-// }
+type Service interface {
+	PromoteUserService(ctx context.Context, id int64) error
+	DemoteUserService(ctx context.Context, id int64) error
+}
 
-// type AdminService struct {
-// 	clientGRPC protobuf.UserServiceClient
-// 	conn       *grpc.ClientConn
-// }
+type AdminService struct {
+	userClient *userclient.UserClient
+}
 
-// func New() *AdminService {
-// 	conn, err := grpc.NewClient(config.USERS_ADDR, grpc.WithTransportCredentials(insecure.NewCredentials()))
-// 	if err != nil {
-// 		logrus.Fatalf("did not connect: %v", err)
-// 	}
-// 	client := protobuf.NewUserServiceClient(conn)
-// 	return &AdminService{
-// 		clientGRPC: client,
-// 		conn:       conn,
-// 	}
-// }
+func New(userclient *userclient.UserClient) *AdminService {
+	return &AdminService{
+		userClient: userclient,
+	}
+}
 
-// func (s *AdminService) PromoteUserService(id string) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
+func (s *AdminService) PromoteUserService(ctx context.Context, id int64) error {
+	getResponse, err := s.userClient.GRPC.GetUserByID(ctx, &protouser.GetUserByIDRequest{Id: id})
+	if err != nil {
+		return err
+	}
+	updatedUser := getResponse.GetUser()
+	if updatedUser.IsAdmin {
+		return nil
+	}
+	updatedUser.IsAdmin = true
+	putResponse, err := s.userClient.GRPC.UpdateUser(ctx, &protouser.UpdateUserRequest{Id: id, User: updatedUser})
+	if err != nil {
+		return err
+	}
+	if !putResponse.Success {
+		return errors.Errorf("something went wrong")
+	}
+	return nil
+}
 
-// 	rGet, err := s.clientGRPC.GetUser(ctx, &protobuf.GetUserRequest{Id: id})
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = s.clientGRPC.UpdateUser(ctx, &protobuf.UpdateUserRequest{
-// 		Id: id,
-// 		User: &protobuf.User{
-// 			Name:       rGet.GetUser().GetEmail(),
-// 			Email:      rGet.GetUser().GetEmail(),
-// 			Password:   rGet.GetUser().GetPassword(),
-// 			IsAdmin:    true,
-// 			IsVerified: rGet.GetUser().GetIsVerified(),
-// 		},
-// 	})
-// 	return err
-// }
-
-// func (s *AdminService) DemoteUserService(id string) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
-
-// 	rGet, err := s.clientGRPC.GetUser(ctx, &protobuf.GetUserRequest{Id: id})
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = s.clientGRPC.UpdateUser(ctx, &protobuf.UpdateUserRequest{
-// 		Id: id,
-// 		User: &protobuf.User{
-// 			Name:       rGet.GetUser().GetName(),
-// 			Email:      rGet.GetUser().GetEmail(),
-// 			Password:   rGet.GetUser().GetPassword(),
-// 			IsAdmin:    false,
-// 			IsVerified: rGet.GetUser().GetIsVerified(),
-// 		},
-// 	})
-// 	return err
-// }
-
-// func (s *AdminService) Close() error {
-// 	return s.conn.Close()
-// }
+func (s *AdminService) DemoteUserService(ctx context.Context, id int64) error {
+	getResponse, err := s.userClient.GRPC.GetUserByID(ctx, &protouser.GetUserByIDRequest{Id: id})
+	if err != nil {
+		return err
+	}
+	updatedUser := getResponse.GetUser()
+	if !updatedUser.IsAdmin {
+		return nil
+	}
+	updatedUser.IsAdmin = false
+	putResponse, err := s.userClient.GRPC.UpdateUser(ctx, &protouser.UpdateUserRequest{Id: id, User: updatedUser})
+	if err != nil {
+		return err
+	}
+	if !putResponse.Success {
+		return errors.Errorf("something went wrong")
+	}
+	return nil
+}

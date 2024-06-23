@@ -7,7 +7,7 @@ package repository
 
 import (
 	"context"
-	"database/sql"
+	"shopito/services/users/internal/domain"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -42,9 +42,9 @@ const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, name, email, password, is_admin, is_verified, created_at, updated_at FROM users WHERE email = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (domain.User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
-	var i User
+	var i domain.User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -62,9 +62,9 @@ const getUserById = `-- name: GetUserById :one
 SELECT id, name, email, password, is_admin, is_verified, created_at, updated_at FROM users WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
+func (q *Queries) GetUserById(ctx context.Context, id int64) (domain.User, error) {
 	row := q.db.QueryRowContext(ctx, getUserById, id)
-	var i User
+	var i domain.User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -104,9 +104,9 @@ const isVerifiedByEmail = `-- name: IsVerifiedByEmail :one
 SELECT is_verified FROM users WHERE email = $1
 `
 
-func (q *Queries) IsVerifiedByEmail(ctx context.Context, email string) (sql.NullBool, error) {
+func (q *Queries) IsVerifiedByEmail(ctx context.Context, email string) (bool, error) {
 	row := q.db.QueryRowContext(ctx, isVerifiedByEmail, email)
-	var is_verified sql.NullBool
+	var is_verified bool
 	err := row.Scan(&is_verified)
 	return is_verified, err
 }
@@ -115,9 +115,9 @@ const isVerifiedByID = `-- name: IsVerifiedByID :one
 SELECT is_verified FROM users WHERE id = $1
 `
 
-func (q *Queries) IsVerifiedByID(ctx context.Context, id int64) (sql.NullBool, error) {
+func (q *Queries) IsVerifiedByID(ctx context.Context, id int64) (bool, error) {
 	row := q.db.QueryRowContext(ctx, isVerifiedByID, id)
-	var is_verified sql.NullBool
+	var is_verified bool
 	err := row.Scan(&is_verified)
 	return is_verified, err
 }
@@ -126,15 +126,15 @@ const listUsers = `-- name: ListUsers :many
 SELECT id, name, email, password, is_admin, is_verified, created_at, updated_at FROM users
 `
 
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+func (q *Queries) ListUsers(ctx context.Context) ([]domain.User, error) {
 	rows, err := q.db.QueryContext(ctx, listUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []domain.User
 	for rows.Next() {
-		var i User
+		var i domain.User
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -168,8 +168,8 @@ type UpdateUserParams struct {
 	Name       string
 	Email      string
 	Password   string
-	IsAdmin    sql.NullBool
-	IsVerified sql.NullBool
+	IsAdmin    bool
+	IsVerified bool
 	ID         int64
 }
 

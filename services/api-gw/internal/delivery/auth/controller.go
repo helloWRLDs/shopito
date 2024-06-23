@@ -3,14 +3,12 @@ package authcontroller
 import (
 	"fmt"
 	"net/http"
-	userproto "shopito/pkg/protobuf/users"
+	protouser "shopito/pkg/protobuf/user"
 	"shopito/pkg/types/errors"
 	"shopito/pkg/types/response"
 	grpcutil "shopito/pkg/util/grpc"
 	jsonutil "shopito/pkg/util/json"
 	authservice "shopito/services/api-gw/internal/service/auth"
-
-	"github.com/go-chi/chi"
 )
 
 type AuthController struct {
@@ -21,15 +19,6 @@ func New(service *authservice.AuthService) *AuthController {
 	return &AuthController{
 		service: service,
 	}
-}
-
-func (c *AuthController) Routes() chi.Router {
-	r := chi.NewRouter()
-
-	r.Post("/login", c.LoginController)
-	r.Post("/register", c.RegisterController)
-
-	return r
 }
 
 // @Summary 	Login User
@@ -46,7 +35,7 @@ func (c *AuthController) Routes() chi.Router {
 // @Router /auth/login [post]
 func (c *AuthController) LoginController(w http.ResponseWriter, r *http.Request) {
 
-	user, err := jsonutil.DecodeJson[userproto.CreateUserRequest](r)
+	user, err := jsonutil.DecodeJson[protouser.CreateUserRequest](r)
 	if err != nil {
 		errors.SendErr(w, errors.ErrUnpocessableEntity.SetMessage("Couldn't process the user data"))
 		return
@@ -74,7 +63,7 @@ func (c *AuthController) LoginController(w http.ResponseWriter, r *http.Request)
 // @Failure     500 {object} errors.HTTPError "Internal server error"
 // @Router /auth/register [post]
 func (c *AuthController) RegisterController(w http.ResponseWriter, r *http.Request) {
-	newUser, err := jsonutil.DecodeJson[userproto.CreateUserRequest](r)
+	newUser, err := jsonutil.DecodeJson[protouser.CreateUserRequest](r)
 	if err != nil {
 		jsonutil.EncodeJson(w, 400, "Invalid Credentails")
 		return
